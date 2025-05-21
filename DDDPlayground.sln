@@ -1,0 +1,72 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.12.35728.132 d17.12
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{3DE55631-CA15-40E4-B026-0DED31B9AA68}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DDDPlayground.Domain", "DDDPlayground.Domain\DDDPlayground.Domain.csproj", "{11CAD1B0-D425-4105-A4D5-15F3BA690F6B}"
+	ProjectSection(ProjectDependencies) = postProject
+		{1A476A47-2DD6-47F5-97B1-C3E6EF403B60} = {1A476A47-2DD6-47F5-97B1-C3E6EF403B60}
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{F5EF3EF5-2A20-4998-B122-8565AD3DEBE4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DDDPlayground.Infrastructure", "DDDPlayground.Infrastructure\DDDPlayground.Infrastructure.csproj", "{BADE4AE0-A7FE-4D2C-90D8-E869907DAC21}"
+	ProjectSection(ProjectDependencies) = postProject
+		{1A476A47-2DD6-47F5-97B1-C3E6EF403B60} = {1A476A47-2DD6-47F5-97B1-C3E6EF403B60}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DDDPlayground.Application", "DDDPlayground.Application\DDDPlayground.Application.csproj", "{8A617D01-B469-4B71-977E-56E400C5580B}"
+	ProjectSection(ProjectDependencies) = postProject
+		{11CAD1B0-D425-4105-A4D5-15F3BA690F6B} = {11CAD1B0-D425-4105-A4D5-15F3BA690F6B}
+		{1A476A47-2DD6-47F5-97B1-C3E6EF403B60} = {1A476A47-2DD6-47F5-97B1-C3E6EF403B60}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DDDPlayground.API", "DDDPlayground.API\DDDPlayground.API.csproj", "{16B662D0-8F61-4B37-A9E0-BB1D149712A5}"
+	ProjectSection(ProjectDependencies) = postProject
+		{1A476A47-2DD6-47F5-97B1-C3E6EF403B60} = {1A476A47-2DD6-47F5-97B1-C3E6EF403B60}
+		{8A617D01-B469-4B71-977E-56E400C5580B} = {8A617D01-B469-4B71-977E-56E400C5580B}
+		{BADE4AE0-A7FE-4D2C-90D8-E869907DAC21} = {BADE4AE0-A7FE-4D2C-90D8-E869907DAC21}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DDDPlayground.Shared", "DDDPlayground.Shared\DDDPlayground.Shared.csproj", "{1A476A47-2DD6-47F5-97B1-C3E6EF403B60}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{11CAD1B0-D425-4105-A4D5-15F3BA690F6B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{11CAD1B0-D425-4105-A4D5-15F3BA690F6B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{11CAD1B0-D425-4105-A4D5-15F3BA690F6B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{11CAD1B0-D425-4105-A4D5-15F3BA690F6B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BADE4AE0-A7FE-4D2C-90D8-E869907DAC21}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BADE4AE0-A7FE-4D2C-90D8-E869907DAC21}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BADE4AE0-A7FE-4D2C-90D8-E869907DAC21}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BADE4AE0-A7FE-4D2C-90D8-E869907DAC21}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8A617D01-B469-4B71-977E-56E400C5580B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8A617D01-B469-4B71-977E-56E400C5580B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8A617D01-B469-4B71-977E-56E400C5580B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8A617D01-B469-4B71-977E-56E400C5580B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{16B662D0-8F61-4B37-A9E0-BB1D149712A5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{16B662D0-8F61-4B37-A9E0-BB1D149712A5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{16B662D0-8F61-4B37-A9E0-BB1D149712A5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{16B662D0-8F61-4B37-A9E0-BB1D149712A5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1A476A47-2DD6-47F5-97B1-C3E6EF403B60}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1A476A47-2DD6-47F5-97B1-C3E6EF403B60}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1A476A47-2DD6-47F5-97B1-C3E6EF403B60}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1A476A47-2DD6-47F5-97B1-C3E6EF403B60}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{11CAD1B0-D425-4105-A4D5-15F3BA690F6B} = {3DE55631-CA15-40E4-B026-0DED31B9AA68}
+		{BADE4AE0-A7FE-4D2C-90D8-E869907DAC21} = {3DE55631-CA15-40E4-B026-0DED31B9AA68}
+		{8A617D01-B469-4B71-977E-56E400C5580B} = {3DE55631-CA15-40E4-B026-0DED31B9AA68}
+		{16B662D0-8F61-4B37-A9E0-BB1D149712A5} = {3DE55631-CA15-40E4-B026-0DED31B9AA68}
+		{1A476A47-2DD6-47F5-97B1-C3E6EF403B60} = {3DE55631-CA15-40E4-B026-0DED31B9AA68}
+	EndGlobalSection
+EndGlobal
