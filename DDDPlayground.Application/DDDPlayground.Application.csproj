@@ -8,6 +8,13 @@
 
   <ItemGroup>
     <PackageReference Include="AutoMapper" Version="14.0.0" />
+    <PackageReference Include="FluentValidation" Version="12.0.0" />
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DDDPlayground.Domain\DDDPlayground.Domain.csproj" />
+    <ProjectReference Include="..\DDDPlayground.Shared\DDDPlayground.Shared.csproj" />
   </ItemGroup>
 
 </Project>

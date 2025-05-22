@@ -1,5 +1,5 @@
 ﻿using DDDPlayground.Domain.Entities;
-using DDDPlayground.Shared.Persistence;
+using DDDPlayground.Shared.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
