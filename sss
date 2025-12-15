@@ -1,0 +1,136 @@
+[1mdiff --git a/DDDPlayGround.Host/Program.cs b/DDDPlayGround.Host/Program.cs[m
+[1mindex c10eed7..9e6c7b5 100644[m
+[1m--- a/DDDPlayGround.Host/Program.cs[m
+[1m+++ b/DDDPlayGround.Host/Program.cs[m
+[36m@@ -22,6 +22,9 @@[m [mbuilder.Services.AddJwtAuthentication(builder.Configuration);[m
+ [m
+ builder.Services.AddDependancyInjection();[m
+ [m
+[32m+[m[32m// Register SSO Service for token validation[m
+[32m+[m[32mbuilder.Services.AddScoped<DDDPlayGround.Infrastructure.Services.SSOService>();[m
+[32m+[m
+ builder.Host.AddLoggingService(builder.Configuration);[m
+   [m
+ builder.Services.AddMapperService();[m
+[1mdiff --git a/DDDPlayGround.Host/appsettings.json b/DDDPlayGround.Host/appsettings.json[m
+[1mindex 80ee233..039345c 100644[m
+[1m--- a/DDDPlayGround.Host/appsettings.json[m
+[1m+++ b/DDDPlayGround.Host/appsettings.json[m
+[36m@@ -1,4 +1,7 @@[m
+ {[m
+[32m+[m[32m  "ConnectionStrings": {[m
+[32m+[m[32m    "ConnectionString": "Server=AHMADYOUSEF;Database=DDDPlaygroundDb8;Trusted_Connection=True;Trust Server Certificate=True;"[m
+[32m+[m[32m  },[m
+   "JwtSettings": {[m
+     "Secret": "DJMIKMK585855552GVBHBNJKM^HNJBJUHUHJN4",[m
+     "Issuer": "DDDPlayGround",[m
+[1mdiff --git a/DDDPlayGround.Infrastructure/ServiceRegistration.cs b/DDDPlayGround.Infrastructure/ServiceRegistration.cs[m
+[1mindex 7d6feca..9795f01 100644[m
+[1m--- a/DDDPlayGround.Infrastructure/ServiceRegistration.cs[m
+[1m+++ b/DDDPlayGround.Infrastructure/ServiceRegistration.cs[m
+[36m@@ -59,19 +59,53 @@[m [mnamespace DDDPlayGround.Infrastructure[m
+                 .MinimumLevel.Debug()[m
+                 .WriteTo.Console();[m
+ [m
+[32m+[m[32m            // Add file logging as fallback[m
+[32m+[m[32m            var logPath = Path.Combine(Directory.GetCurrentDirectory(), "Logs", "log-.txt");[m
+[32m+[m[32m            loggerConfig = loggerConfig.WriteTo.File([m
+[32m+[m[32m                logPath,[m
+[32m+[m[32m                rollingInterval: RollingInterval.Day,[m
+[32m+[m[32m                retainedFileCountLimit: 30,[m
+[32m+[m[32m                outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}");[m
+[32m+[m
+[32m+[m[32m            // Try to add SQL Server logging, but don't fail if database is unavailable[m
+[32m+[m[32m            // The sink will attempt to connect when first used, so we wrap logger creation in try-catch[m
+             if (!string.IsNullOrWhiteSpace(loggingConnectionString))[m
+             {[m
+[31m-                loggerConfig = loggerConfig.WriteTo.MSSqlServer([m
+[31m-                    connectionString: loggingConnectionString,[m
+[31m-                    sinkOptions: new MSSqlServerSinkOptions[m
+[31m-                    {[m
+[31m-                        TableName = "Logs",[m
+[31m-                        AutoCreateSqlTable = true[m
+[31m-                    });[m
+[32m+[m[32m                try[m
+[32m+[m[32m                {[m
+[32m+[m[32m                    loggerConfig = loggerConfig.WriteTo.MSSqlServer([m
+[32m+[m[32m                        connectionString: loggingConnectionString,[m
+[32m+[m[32m                        sinkOptions: new MSSqlServerSinkOptions[m
+[32m+[m[32m                        {[m
+[32m+[m[32m                            TableName = "Logs",[m
+[32m+[m[32m                            AutoCreateSqlTable = true[m
+[32m+[m[32m                        },[m
+[32m+[m[32m                        restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Warning); // Only log warnings and above to SQL[m
+[32m+[m[32m                }[m
+[32m+[m[32m                catch[m
+[32m+[m[32m                {[m
+[32m+[m[32m                    // If sink configuration fails, continue without SQL logging[m
+[32m+[m[32m                    // The application will use console and file logging only[m
+[32m+[m[32m                }[m
+             }[m
+ [m
+[31m-            Log.Logger = loggerConfig.CreateLogger();[m
+[31m-            builder.UseSerilog();[m
+[32m+[m[32m            try[m
+[32m+[m[32m            {[m
+[32m+[m[32m                Log.Logger = loggerConfig.CreateLogger();[m
+[32m+[m[32m                builder.UseSerilog();[m
+[32m+[m[32m            }[m
+[32m+[m[32m            catch (Exception ex)[m
+[32m+[m[32m            {[m
+[32m+[m[32m                // If logger creation fails (e.g., SQL connection issue), create a minimal logger[m
+[32m+[m[32m                Console.WriteLine($"Warning: Could not initialize full logging configuration. Error: {ex.Message}");[m
+[32m+[m[32m                Console.WriteLine("Application will continue with basic console logging.");[m
+[32m+[m[41m                [m
+[32m+[m[32m                Log.Logger = new LoggerConfiguration()[m
+[32m+[m[32m                    .MinimumLevel.Debug()[m
+[32m+[m[32m                    .WriteTo.Console()[m
+[32m+[m[32m                    .CreateLogger();[m
+[32m+[m[32m                builder.UseSerilog();[m
+[32m+[m[32m            }[m
+ [m
+             return builder;[m
+         }[m
+[1mdiff --git a/DDDPlayGround.Infrastructure/Services/SSOService.cs b/DDDPlayGround.Infrastructure/Services/SSOService.cs[m
+[1mindex 8771727..5929041 100644[m
+[1m--- a/DDDPlayGround.Infrastructure/Services/SSOService.cs[m
+[1m+++ b/DDDPlayGround.Infrastructure/Services/SSOService.cs[m
+[36m@@ -33,14 +33,24 @@[m [mnamespace DDDPlayGround.Infrastructure.Services[m
+                 }[m
+             }[m
+ [m
+[31m-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));[m
+[32m+[m[32m            // Use JwtSettings configuration (shared with API projects)[m
+[32m+[m[32m            var secret = _configuration["JwtSettings:Secret"] ?? _configuration["Jwt:Key"][m[41m [m
+[32m+[m[32m                ?? throw new InvalidOperationException("JWT Secret key not configured");[m
+[32m+[m[32m            var issuer = _configuration["JwtSettings:Issuer"] ?? _configuration["Jwt:Issuer"][m[41m [m
+[32m+[m[32m                ?? throw new InvalidOperationException("JWT Issuer not configured");[m
+[32m+[m[32m            var audience = _configuration["JwtSettings:Audience"] ?? _configuration["Jwt:Audience"][m[41m [m
+[32m+[m[32m                ?? throw new InvalidOperationException("JWT Audience not configured");[m
+[32m+[m[32m            var expiryMinutes = int.TryParse(_configuration["JwtSettings:ExpiryMinutes"], out var minutes)[m[41m [m
+[32m+[m[32m                ? minutes : 60;[m
+[32m+[m
+[32m+[m[32m            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret));[m
+             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);[m
+ [m
+             var token = new JwtSecurityToken([m
+[31m-                issuer: _configuration["Jwt:Issuer"],[m
+[31m-                audience: _configuration["Jwt:Audience"],[m
+[32m+[m[32m                issuer: issuer,[m
+[32m+[m[32m                audience: audience,[m
+                 claims: claims,[m
+[31m-                expires: DateTime.UtcNow.AddHours(1),[m
+[32m+[m[32m                expires: DateTime.UtcNow.AddMinutes(expiryMinutes),[m
+                 signingCredentials: creds);[m
+ [m
+             return new JwtSecurityTokenHandler().WriteToken(token);[m
+[36m@@ -51,16 +61,25 @@[m [mnamespace DDDPlayGround.Infrastructure.Services[m
+             try[m
+             {[m
+                 var tokenHandler = new JwtSecurityTokenHandler();[m
+[31m-                var key = Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]);[m
+[32m+[m[41m                [m
+[32m+[m[32m                // Use JwtSettings configuration (shared with API projects)[m
+[32m+[m[32m                var secret = _configuration["JwtSettings:Secret"] ?? _configuration["Jwt:Key"][m[41m [m
+[32m+[m[32m                    ?? throw new InvalidOperationException("JWT Secret key not configured");[m
+[32m+[m[32m                var issuer = _configuration["JwtSettings:Issuer"] ?? _configuration["Jwt:Issuer"][m[41

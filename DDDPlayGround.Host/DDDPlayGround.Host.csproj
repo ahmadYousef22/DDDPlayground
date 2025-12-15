@@ -18,7 +18,7 @@
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
   </ItemGroup>
 
-  <ItemGroup>
+  <ItemGroup>   
     <None Include="appsettings.sit.json" />
   </ItemGroup>
 

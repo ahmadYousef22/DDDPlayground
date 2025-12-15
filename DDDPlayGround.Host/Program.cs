@@ -17,6 +17,9 @@ builder.Services.AddJwtAuthentication(builder.Configuration);
 
 builder.Services.AddDependancyInjection();
 
+// Register SSO Service for token validation
+builder.Services.AddScoped<DDDPlayGround.Infrastructure.Services.SSOService>();
+
 builder.Host.AddLoggingService(builder.Configuration);
   
 builder.Services.AddMapperService();

@@ -59,19 +59,53 @@ namespace DDDPlayGround.Infrastructure
                 .MinimumLevel.Debug()
                 .WriteTo.Console();
 
+            // Add file logging as fallback
+            var logPath = Path.Combine(Directory.GetCurrentDirectory(), "Logs", "log-.txt");
+            loggerConfig = loggerConfig.WriteTo.File(
+                logPath,
+                rollingInterval: RollingInterval.Day,
+                retainedFileCountLimit: 30,
+                outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}");
+
+            // Try to add SQL Server logging, but don't fail if database is unavailable
+            // The sink will attempt to connect when first used, so we wrap logger creation in try-catch
             if (!string.IsNullOrWhiteSpace(loggingConnectionString))
             {
-                loggerConfig = loggerConfig.WriteTo.MSSqlServer(
-                    connectionString: loggingConnectionString,
-                    sinkOptions: new MSSqlServerSinkOptions
-                    {
-                        TableName = "Logs",
-                        AutoCreateSqlTable = true
-                    });
+                try
+                {
+                    loggerConfig = loggerConfig.WriteTo.MSSqlServer(
+                        connectionString: loggingConnectionString,
+                        sinkOptions: new MSSqlServerSinkOptions
+                        {
+                            TableName = "Logs",
+                            AutoCreateSqlTable = true
+                        },
+                        restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Warning); // Only log warnings and above to SQL
+                }
+                catch
+                {
+                    // If sink configuration fails, continue without SQL logging
+                    // The application will use console and file logging only
+                }
             }
 
-            Log.Logger = loggerConfig.CreateLogger();
-            builder.UseSerilog();
+            try
+            {
+                Log.Logger = loggerConfig.CreateLogger();
+                builder.UseSerilog();
+            }
+            catch (Exception ex)
+            {
+                // If logger creation fails (e.g., SQL connection issue), create a minimal logger
+                Console.WriteLine($"Warning: Could not initialize full logging configuration. Error: {ex.Message}");
+                Console.WriteLine("Application will continue with basic console logging.");
+                
+                Log.Logger = new LoggerConfiguration()
+                    .MinimumLevel.Debug()
+                    .WriteTo.Console()
+                    .CreateLogger();
+                builder.UseSerilog();
+            }
 
             return builder;
         }
